@@ -1,12 +1,25 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default clerkMiddleware()
+export function middleware(request: NextRequest) {
+  // 添加必要的安全头
+  const headers = new Headers(request.headers);
+  headers.set('x-middleware-cache', 'no-cache');
+  
+  // 只允许API路由在服务器端运行
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    headers.set('x-server-only', '1');
+  }
+
+  return NextResponse.next({
+    request: {
+      headers,
+    },
+  });
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    '/api/:path*',
   ],
-}
+};

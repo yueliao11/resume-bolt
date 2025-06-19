@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
+
+// 确保在服务器端运行
+if (typeof window !== 'undefined') {
+  throw new Error('This code should only run on the server');
+}
 
 export async function POST(req: Request) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }

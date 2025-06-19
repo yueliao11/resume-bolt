@@ -10,100 +10,26 @@ const nextConfig = {
     unoptimized: true,
     domains: ['images.pexels.com']
   },
-  // 性能优化配置
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
-    outputFileTracingExcludes: {
-      '*': [
-        'supabase/functions/**/*',
-        '.git/**/*',
-        '.next/**/*',
-        'node_modules/@esbuild/**/*',
-        'node_modules/@swc/**/*',
-      ],
-    },
-    forceSwcTransforms: true,
+  // Runtime configuration for server and client
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    openrouterApiKey: process.env.OPENROUTER_API_KEY,
   },
-  // 压缩配置
-  compress: true,
-  // 静态文件优化
-  generateEtags: true,
-  poweredByHeader: false,
-  // Webpack 优化
-  webpack: (config, { isServer, dev }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    
-    // 生产环境优化
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-    
-    // 排除原生模块
-    config.externals = config.externals || [];
-    config.externals.push({
-      '@next/swc-linux-x64-gnu': 'commonjs @next/swc-linux-x64-gnu',
-      '@next/swc-linux-x64-musl': 'commonjs @next/swc-linux-x64-musl',
-    });
-    
-    return config;
+  publicRuntimeConfig: {
+    // Exposed to both server and client
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   },
-  // 头部优化
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-        ],
-      },
-      {
-        source: '/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
+  // 输出配置
+  output: 'standalone',
+  // 编译外部包
+  transpilePackages: [
+    '@clerk/nextjs',
+    '@supabase/supabase-js',
+    'openai',
+  ],
 };
 
-module.exports = nextConfig;
+module.exports = nextConfig; 

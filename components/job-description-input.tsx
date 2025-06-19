@@ -135,7 +135,7 @@ export function JobDescriptionInput({ onSubmit }: JobDescriptionInputProps) {
                 <Alert className="border-red-500 bg-red-500/10">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-red-400 flex items-center justify-between">
-                    <span>{error}</span>
+                    <span>{typeof error === 'string' ? error : error?.message || '发生错误'}</span>
                     <Button 
                       variant="ghost" 
                       size="sm" 

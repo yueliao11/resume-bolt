@@ -71,7 +71,7 @@ export default function OptimizationDetail() {
                 加载失败
               </h3>
               <p className="text-slate-400 mb-6">
-                {error?.message || '未找到优化记录'}
+                {(typeof error === 'string' ? error : error?.message) || '未找到优化记录'}
               </p>
               <Link href="/history">
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">

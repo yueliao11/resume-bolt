@@ -1,6 +1,6 @@
 import { Language, ResumeData, OptimizationResult } from '@/lib/types';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'demo-key';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 export async function optimizeResume(
@@ -62,7 +62,7 @@ function generateOptimizationPrompt(
   };
 
   // 检测招聘描述的语言
-  const detectJobLanguage = (text: string): string => {
+  const detectJobLanguage = (text: string): Language => {
     const chinesePattern = /[\u4e00-\u9fff]/g;
     const japanesePattern = /[\u3040-\u309f\u30a0-\u30ff]/g;
     const koreanPattern = /[\uac00-\ud7af]/g;
@@ -74,7 +74,7 @@ function generateOptimizationPrompt(
   };
 
   const detectedJobLanguage = detectJobLanguage(jobDescription);
-  const finalLanguage = detectedJobLanguage || language;
+  const finalLanguage: Language = detectedJobLanguage || language;
 
   return `您是一位拥有15年丰富经验的资深HR猎头和简历优化专家，具备深厚的人力资源洞察力和市场敏感度。${languageInstructions[finalLanguage] || languageInstructions[language] || 'Please respond in English and ensure the output resume language matches the job description language'}.
 

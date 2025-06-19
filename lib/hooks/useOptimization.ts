@@ -4,17 +4,50 @@ import { useState, useCallback } from 'react';
 import { ResumeData, OptimizationResult, JobAnalysis } from '@/lib/types';
 import { validateJobDescription } from '@/lib/utils';
 
+// 新增类型定义
+interface OptimizationRecord {
+  id: string;
+  job_title: string;
+  company: string;
+  match_score: number;
+  created_at: string;
+  original_resume_content: string;
+  optimized_resume_content: string;
+}
+
+interface KeywordAnalysis {
+  matched_keywords: string[];
+  added_keywords: string[];
+  missing_keywords: string[];
+}
+
+interface Suggestion {
+  id: string;
+  suggestion_type: 'content' | 'format' | 'keyword' | 'structure';
+  suggestion_text: string;
+  priority: number; // 1: 高优先级, 2: 中优先级, 3: 低优先级
+}
+
 interface UseOptimizationReturn {
   isOptimizing: boolean;
-  error: string | null;
+  loading: boolean;
+  error: Error | string | null;
+  optimization?: OptimizationRecord;
+  keywordAnalysis?: KeywordAnalysis;
+  suggestions?: Suggestion[];
   optimizeResume: (resumeData: ResumeData, jobDescription: string) => Promise<OptimizationResult | null>;
   analyzeJobDescription: (description: string) => JobAnalysis | null;
+  fetchOptimizationDetail: (id: string) => Promise<void>;
   clearError: () => void;
 }
 
 export function useOptimization(): UseOptimizationReturn {
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | string | null>(null);
+  const [optimization, setOptimization] = useState<OptimizationRecord | undefined>();
+  const [keywordAnalysis, setKeywordAnalysis] = useState<KeywordAnalysis | undefined>();
+  const [suggestions, setSuggestions] = useState<Suggestion[] | undefined>();
 
   const clearError = useCallback(() => {
     setError(null);
@@ -40,6 +73,62 @@ export function useOptimization(): UseOptimizationReturn {
         'Bachelor\'s degree in Computer Science or related field'
       ]
     };
+  }, []);
+
+  const fetchOptimizationDetail = useCallback(async (id: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 模拟API调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 模拟数据
+      const mockOptimization: OptimizationRecord = {
+        id,
+        job_title: '高级软件工程师',
+        company: 'TechCorp',
+        match_score: 85,
+        created_at: new Date().toISOString(),
+        original_resume_content: '原始简历内容...',
+        optimized_resume_content: '优化后的简历内容...'
+      };
+
+      const mockKeywordAnalysis: KeywordAnalysis = {
+        matched_keywords: ['React', 'Node.js', 'TypeScript'],
+        added_keywords: ['系统架构', '团队管理'],
+        missing_keywords: ['Kubernetes', 'GraphQL']
+      };
+
+      const mockSuggestions: Suggestion[] = [
+        {
+          id: '1',
+          suggestion_type: 'content',
+          suggestion_text: '建议在技能部分添加更多具体的技术细节和项目经验',
+          priority: 1
+        },
+        {
+          id: '2', 
+          suggestion_type: 'keyword',
+          suggestion_text: '在工作经历中添加具体的数据和成果指标以提升匹配度',
+          priority: 2
+        },
+        {
+          id: '3',
+          suggestion_type: 'structure',
+          suggestion_text: '重新组织简历结构，将最相关的经验放在前面',
+          priority: 2
+        }
+      ];
+
+      setOptimization(mockOptimization);
+      setKeywordAnalysis(mockKeywordAnalysis);
+      setSuggestions(mockSuggestions);
+    } catch (err) {
+      setError(err instanceof Error ? err : '获取优化详情失败');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const optimizeResume = useCallback(async (
@@ -91,9 +180,14 @@ export function useOptimization(): UseOptimizationReturn {
 
   return {
     isOptimizing,
+    loading,
     error,
+    optimization,
+    keywordAnalysis,
+    suggestions,
     optimizeResume,
     analyzeJobDescription,
+    fetchOptimizationDetail,
     clearError
   };
 }
