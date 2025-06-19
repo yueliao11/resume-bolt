@@ -18,14 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: undefined,
-        variables: {
-          colorPrimary: '#7c3aed',
-        },
-      }}
-    >
+    <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className} suppressHydrationWarning>
           <LanguageProvider>
