@@ -7,10 +7,13 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: { 
-    unoptimized: true 
+    unoptimized: true,
+    domains: ['images.pexels.com']
   },
-  // 强制动态渲染某些页面以避免预渲染问题
+  // 性能优化配置
   experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
     outputFileTracingExcludes: {
       '*': [
         'supabase/functions/**/*',
@@ -20,16 +23,44 @@ const nextConfig = {
         'node_modules/@swc/**/*',
       ],
     },
-    // 禁用静态优化以避免 Clerk 预渲染问题
     forceSwcTransforms: true,
   },
-  webpack: (config, { isServer }) => {
+  // 压缩配置
+  compress: true,
+  // 静态文件优化
+  generateEtags: true,
+  poweredByHeader: false,
+  // Webpack 优化
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
+      };
+    }
+    
+    // 生产环境优化
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              enforce: true,
+            },
+          },
+        },
       };
     }
     
@@ -41,6 +72,37 @@ const nextConfig = {
     });
     
     return config;
+  },
+  // 头部优化
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 
