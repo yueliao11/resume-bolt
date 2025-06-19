@@ -32,6 +32,20 @@ export interface ResumeData {
   achievements?: string[];
 }
 
+// 新增HR分析接口
+export interface RecruitmentIntent {
+  coreRequirements: string[];
+  hiddenExpectations: string[];
+  culturalFit: string;
+  careerLevel: string;
+}
+
+export interface EnhancementAnalysis {
+  professionalUpgrades: string[];
+  languageRefinements: string[];
+  structuralImprovements: string[];
+}
+
 export interface OptimizationResult {
   optimizedResume: ResumeData;
   matchScore: number;
@@ -41,6 +55,10 @@ export interface OptimizationResult {
   addedKeywords: string[];
   optimizationSuggestions: string[];
   optimizationImprovements: string[];
+  // 新增的HR专业分析字段
+  jobLanguage?: string;
+  recruitmentIntent?: RecruitmentIntent;
+  enhancementAnalysis?: EnhancementAnalysis;
 }
 
 export interface JobAnalysis {
