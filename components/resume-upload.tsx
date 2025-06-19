@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { ResumePreview } from '@/components/resume-preview';
 import { useLanguage } from '@/lib/language-context';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
 import { ResumeData } from '@/lib/types';
@@ -19,6 +20,9 @@ interface ResumeUploadProps {
 export function ResumeUpload({ onUpload }: ResumeUploadProps) {
   const { t } = useLanguage();
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showPreview, setShowPreview] = useState(false);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  
   const {
     file,
     isUploading,
@@ -28,7 +32,10 @@ export function ResumeUpload({ onUpload }: ResumeUploadProps) {
     isDragActive,
     clearError,
     reset
-  } = useFileUpload(onUpload);
+  } = useFileUpload((data: ResumeData) => {
+    setResumeData(data);
+    setShowPreview(true);
+  });
 
   // 模拟上传进度
   useState(() => {
@@ -48,6 +55,29 @@ export function ResumeUpload({ onUpload }: ResumeUploadProps) {
       setUploadProgress(0);
     }
   });
+
+  const handleConfirmPreview = () => {
+    if (resumeData) {
+      onUpload(resumeData);
+    }
+  };
+
+  const handleReupload = () => {
+    setShowPreview(false);
+    setResumeData(null);
+    reset();
+  };
+
+  // 如果显示预览，渲染预览组件
+  if (showPreview && resumeData) {
+    return (
+      <ResumePreview
+        resumeData={resumeData}
+        onConfirm={handleConfirmPreview}
+        onReupload={handleReupload}
+      />
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
